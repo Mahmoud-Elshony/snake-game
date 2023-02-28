@@ -1,0 +1,32 @@
+* {
+  margin: 0;
+  background-color: #aaa;
+}
+.game-flow {
+  width: 100%;
+  height: 490px;
+}
+hr {
+  background-color: #eee;
+  height: 4px;
+}
+
+.score {
+  font-size: 32px;
+  margin: 20px;
+  display: inline-block;
+  font-family: monospace;
+}
+.snake-body-part,
+.snake-head,.snake-tail{
+    width: 25px;
+    height: 25px;
+    position: absolute;
+    background-color:red;
+    display: inline-block;
+    margin: 1px;
+}
+.snake-head{
+  z-index: 143;
+  background-color: blue;
+}
