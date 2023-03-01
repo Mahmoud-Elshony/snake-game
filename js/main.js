@@ -1,24 +1,36 @@
+let snake;
 let gameFlow = document.querySelector('.game-flow');
 let snakeHead = document.querySelector('.snake-head');
+let snakeWidthHeight = snakeHead.getBoundingClientRect().width; // do not change /* to change this edite  line 8,9 in style.css  */
 let snakeBody = document.querySelector('.snake-body-container');
-let snakeBodyParts = document.querySelectorAll('.snake-body-part');
-let snake = document.querySelectorAll('.snake div');
+let snakeBodyPart = document.createElement('div');
 let apple = document.createElement('div');
+let wall = document.querySelectorAll('.walls')
 let scoreEle = document.querySelector('.score');
 let score = 0;
 let snakeDir = { x: 1, y: 0 };
-let speed = 100;
+let gameSpeed = 150;
+
 function start() {
-    // snake = document.querySelectorAll('.snake div');
+    snakeBodyPart.classList.add('snake-body-part')
+    snakeBody.prepend(snakeBodyPart)
+    snake = document.querySelectorAll('.snake div');
     snake.forEach((part, i) => {
         part.style.top = `${gameFlow.getBoundingClientRect().height / 2}px`;
-        part.style.left = `${Math.floor(gameFlow.getBoundingClientRect().width) / 2 - (25 * i)}px`;
+        part.style.left = `${Math.floor(gameFlow.getBoundingClientRect().width) / 2 - (snakeWidthHeight * i)}px`;
     })
     createApple();
 }
-function update() {
-    window.requestAnimationFrame(update);
+function createWall() {
+    let flowWidth = gameFlow.getBoundingClientRect().width;
+    let flowHeight = gameFlow.getBoundingClientRect().height;
+    wall[0].style.cssText = `position:absolute;width:${flowWidth}px;height:${50}px;background-color:#333;`;
+    wall[1].style.cssText = `position:relative;width:${flowWidth}px;height:${50}px;background-color:#333;bottom: -${flowHeight}px;`;
+    wall[2].style.cssText = `position:absolute;width:${50}px;height:${flowHeight}px;background-color:#333;`;
+    wall[3].style.cssText = `position:relative;width:${50}px;height:${flowHeight}px;background-color:#333;right:-${flowWidth - 50}px;`;
+
 }
+createWall()
 function col(el1, el2) {
     snake = document.querySelectorAll('.snake div');
     const a = el1.getBoundingClientRect();
@@ -38,51 +50,62 @@ function createApple() {
     width:30px;
     height:30px;
     border-radius:50%;
-    top:${Math.random() * 300}px;
-    left:${Math.random() * 300}px`;
+    top:${Math.random() * 300+200}px;
+    left:${Math.random() * 700+100}px`;
     gameFlow.appendChild(apple);
 }
 function moveSnake(m) {
-    // shufflSnake();
     if (m.key === 'ArrowRight') {
-        // snakeHead.style.left = Math.floor(snakeHead.getBoundingClientRect().left) + 25 + 'px';
         snakeHead.style.cssText += "border-radius: 0% 34% 34% 0px;";
         [snakeDir.x, snakeDir.y] = [1, 0]
     }
     if (m.key === 'ArrowLeft') {
-        // snakeHead.style.left = Math.floor(snakeHead.getBoundingClientRect().left) - 25 + 'px';
         snakeHead.style.cssText += "border-radius: 34% 0% 0px 34%;";
         [snakeDir.x, snakeDir.y] = [-1, 0]
     }
     if (m.key === 'ArrowDown') {
-        // snakeHead.style.top = Math.floor(snakeHead.getBoundingClientRect().top) + 25 + 'px';
         snakeHead.style.cssText += "border-radius: 0% 0px 34% 34%;";
         [snakeDir.x, snakeDir.y] = [0, 1]
     }
     if (m.key === 'ArrowUp') {
-        // snakeHead.style.top = Math.floor(snakeHead.getBoundingClientRect().top) - 25 + 'px';
         snakeHead.style.cssText += "border-radius: 34% 34% 0% 0px;";
         [snakeDir.x, snakeDir.y] = [0, -1]
     }
-
-    // chick coll snake and apple 
+}
+function moving() {
+    shufflSnake()
+    snakeHead.style.top = Math.ceil(snakeHead.getBoundingClientRect().top - 1) + snakeDir.y * snakeWidthHeight + 'px';
+    snakeHead.style.left = Math.ceil(snakeHead.getBoundingClientRect().left - 1) + snakeDir.x * snakeWidthHeight + 'px';
     if (col(snakeHead, apple)) {
         createApple();
         scoreEle.innerHTML = ++score;
-        snakeBody.append(snakeBodyParts[0].cloneNode(true))
+        snakeBody.append(snakeBodyPart.cloneNode(true))
     }
-    console.log(snakeDir)
 }
+function update() {
+    // chick collision snake and apple 
+    if (col(snakeHead, apple)) {
+        createApple();
+        scoreEle.innerHTML = ++score;
+        snakeBody.append(snakeBodyPart.cloneNode(true))
+    }
+    window.requestAnimationFrame(moving);
+    // chick snake colision with his body
+    for (let i = 1; i < snake.length; i++) {
+        if (col(snakeHead, snake[i])) {
+            console.log('#')
+            clearInterval(ward)
+        }
+    }
+    for (let i = 0; i < wall.length; i++) {
+        if (col(snakeHead, wall[i])) {
+            console.log('#')
+            clearInterval(ward)
+        }
+    }
+}
+
 start()
 window.addEventListener('keydown', moveSnake)
 
-let ward = setInterval(() => {
-    shufflSnake()
-    snakeHead.style.top = Math.ceil(snakeHead.getBoundingClientRect().top - 1) + snakeDir.y * 25 + 'px';
-    snakeHead.style.left = Math.ceil(snakeHead.getBoundingClientRect().left - 1) + snakeDir.x * 25 + 'px';
-    if (col(snakeHead, apple)) {
-        createApple();
-        scoreEle.innerHTML = ++score;
-        snakeBody.append(snakeBodyParts[0].cloneNode(true))
-    }
-}, 143)
+let ward = setInterval(update, gameSpeed)
